@@ -22,20 +22,31 @@ public class TeamRepoistory {
         this.hashOperations = this.redisTemplate.opsForHash();
         //this.listOperations = redisTemplate.opsForList();
     }
+
+    //save team
     public void save(Team team){
         //if(team == null)return;
         hashOperations.put("TEAM", team.getName(), team);
 
     }
+    //get team by id
     public Team getById(String id){
+        //returns null if not found
         return (Team) hashOperations.get("TEAM",id);
     }
 
+    //save all team
     public void saveAll(List<Team> list){
         Map<String, Object> map1 = new HashMap<>();
-        map1.put("TEAM", list);
+        //map1.put("TEAM", list);
+        for (Team t:
+                list) {
+            map1.put(t.getName(), t);
+        }
         hashOperations.putAll("TEAM", map1);
     }
+
+    //get list of all teams
     public Map<String,Object> findAll(){
         return  hashOperations.entries("TEAM");
     }

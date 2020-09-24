@@ -36,7 +36,7 @@ public class RedisController {
         Team team = objectMapper.readValue(ts,Team.class);
         if(team == null)return null;
         repo.save(team);
-        return team;
+        return repo.getById(team.getName());
     }
     @GetMapping("/{id}")
     public Team getTeam(@PathVariable String id){
