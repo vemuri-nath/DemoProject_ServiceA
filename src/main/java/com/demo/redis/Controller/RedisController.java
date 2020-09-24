@@ -1,54 +1,62 @@
 package com.demo.redis.Controller;
 
 import com.demo.redis.Model.Team;
-//import com.demo.redis.Repository.TeamRepoistory;
 import com.demo.redis.Repository.TeamRepoistory;
+
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Iterator;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
-@RequestMapping("/redis")
+@RequestMapping("/redis/team")
 public class RedisController {
-
     @Autowired
     TeamRepoistory repo;
 
     @Autowired
     private RestTemplate restTemplate;
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
     @PostMapping ("/{id}")
-    public void anInt(@PathVariable String id){
-        Team team = restTemplate.getForObject("http://localhost:8083/api/team/"+id,Team.class);
+    public Team saveTeam(@PathVariable String id) throws JsonProcessingException {
+        String ts = restTemplate.getForObject("http://localhost:8083/api/team/"+id,String.class);
+        if(ts == null)return null;
+        Team team = objectMapper.readValue(ts,Team.class);
+        if(team == null)return null;
         repo.save(team);
+        return team;
     }
     @GetMapping("/{id}")
     public Team getTeam(@PathVariable String id){
         return repo.getById(id);
     }
 
+    @PostMapping("/all")
+   public List list() throws JsonProcessingException {
+        String s = restTemplate.getForObject("http://localhost:8083/api/team/",String.class);
+        List<Team> teams = objectMapper.readValue(s,new TypeReference<List<Team>>() {});
+        repo.saveAll(teams);
+        return teams;
+   }
 
 
     @GetMapping("/all")
-    public List <Team> getTeam(){
-        /*for(Team t:teams) repo.save(t);
+    public Map<String, Object> getTeam()  {
 
-         Iterable<Team> it= repo.findAll();
-         List<Team> teamList = new ArrayList<Team>();
-         it.forEach(teamList::add);
-         return teamList;
-
-          */
-
-        List<Team> teamList = restTemplate.getForObject("http://localhost:8083/api/team/", List.class);
-        /*for (Team t : teamList) {
-            repo.save(t);
-        }*/
-        return restTemplate.getForObject("http://localhost:8083/api/team/", List.class);
-        //return repo.findALl();
+        return repo.findAll();
 
     }
+
 }
