@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public class ServiceRepository {
+public class ServiceRepository implements ServiceRepo{
     private HashOperations hashOperations;
     //private ListOperations listOperations;
     @Autowired
@@ -23,13 +23,15 @@ public class ServiceRepository {
         this.hashOperations = this.redisTemplate.opsForHash();
         //this.listOperations = redisTemplate.opsForList();
     }
-
+    @Override
     public void save(Services services){
         hashOperations.put("SERVICE",services.getId().toString(),services);
     }
+    @Override
     public Services getById(Long id){
         return (Services) hashOperations.get("SERVICE",id.toString());
     }
+    @Override
     public void saveAll(List<Services> list){
         Map<String, Object> map1 = new HashMap<>();
         for (Services u:
@@ -38,7 +40,7 @@ public class ServiceRepository {
         }
         hashOperations.putAll("SERVICE",map1);
     }
-
+    @Override
     public Map<String,Object> usersMap(){
         return hashOperations.entries("SERVICE");
     }

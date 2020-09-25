@@ -36,6 +36,10 @@ public class ServiceController {
     public Services findById(@PathVariable Long id){
         return serviceRepository.getById(id);
     }
+
+
+
+
     @PostMapping("/all")
     public List list() throws JsonProcessingException {
         String s = restTemplate.getForObject("http://localhost:8083/api/services/",String.class);

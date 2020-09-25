@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public class UserRepository {
+public class UserRepository implements UserRepo{
     private HashOperations hashOperations;
     //private ListOperations listOperations;
     @Autowired
@@ -25,22 +25,26 @@ public class UserRepository {
     }
 
     //save the user
+    @Override
     public void save(Users users){
         hashOperations.put("USER", users.getId().toString(),users);
         hashOperations.put("USER_MAIL",users.getEmail(),users);
     }
 
     //get by user id
+    @Override
     public Users getById(Long id){
         return (Users) hashOperations.get("USER",id.toString());
     }
 
     //get by user Email
+    @Override
     public Users getByEmail(String email){
         return (Users) hashOperations.get("USER_MAIL",email);
     }
 
     //save all users
+    @Override
     public void saveAll(List<Users>list){
         Map<String, Object> map1 = new HashMap<>();
         Map<String, Object>map2 = new HashMap<>();
@@ -54,6 +58,7 @@ public class UserRepository {
     }
 
     //get the list of all users
+    @Override
     public Map<String,Object> usersMap(){
         return hashOperations.entries("USER");
     }
