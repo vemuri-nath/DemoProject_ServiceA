@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 public class UserRepository implements UserRepo{
@@ -27,8 +28,12 @@ public class UserRepository implements UserRepo{
     //save the user
     @Override
     public void save(Users users){
+        if(getById(users.getId())!=null)return;
         hashOperations.put("USER", users.getId().toString(),users);
         hashOperations.put("USER_MAIL",users.getEmail(),users);
+        redisTemplate.expire("USER",5, TimeUnit.SECONDS);
+        redisTemplate.expire("USER_MAIL",5,TimeUnit.SECONDS);
+
     }
 
     //get by user id
@@ -50,16 +55,19 @@ public class UserRepository implements UserRepo{
         Map<String, Object>map2 = new HashMap<>();
         for (Users u:
              list) {
-            map1.put(u.getId().toString(), u);
-            map2.put(u.getEmail(), u);
+            save(u);
         }
-        hashOperations.putAll("USER",map1);
-        hashOperations.putAll("USER_MAIL",map2);
     }
 
     //get the list of all users
     @Override
     public Map<String,Object> usersMap(){
         return hashOperations.entries("USER");
+    }
+
+    @Override
+    public Long find()
+    {
+        return hashOperations.size("USER");
     }
 }

@@ -12,4 +12,5 @@ public interface TeamRepo {
     public Team getById(String id);
     public void saveAll(List<Team> list);
     public Map<String,Object> findAll();
+    public Long find();
 }

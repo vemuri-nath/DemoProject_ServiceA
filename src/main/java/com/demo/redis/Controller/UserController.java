@@ -22,8 +22,9 @@ public class UserController {
 
     ObjectMapper objectMapper = new ObjectMapper();
     //save users
-    @PostMapping("/{id}")
+    @GetMapping("/{id}")
     public Users saveUsers(@PathVariable Long id) throws JsonProcessingException {
+        if(userRepository.getById(id)!=null)return userRepository.getById(id);
         String userString = restTemplate.getForObject("http://localhost:8083/api/user/"+id,String.class);
         if(userString==null)return null;
         Users users = objectMapper.readValue(userString, Users.class);
@@ -31,24 +32,17 @@ public class UserController {
         return userRepository.getById(id);
     }
 
-    //get user by id
-    @GetMapping("/{id}")
-    public Users getById(@PathVariable Long id){
-        return userRepository.getById(id);
-    }
-    //save the list of all users
-    @PostMapping("/all")
-    public List list() throws JsonProcessingException {
+
+
+
+    //show the list of all users
+    @GetMapping("/all")
+    public Map<String, Object> getUsers() throws JsonProcessingException {
+        if(userRepository.find()!=0)return userRepository.usersMap();
         String s = restTemplate.getForObject("http://localhost:8083/api/user/",String.class);
         List<Users> usersList = objectMapper.readValue(s, new TypeReference<List<Users>>() {
         }) ;
         userRepository.saveAll(usersList);
-        return usersList;
-    }
-
-    //show the list of all users
-    @GetMapping("/all")
-    public Map<String, Object> getUsers(){
         return userRepository.usersMap();
     }
 }

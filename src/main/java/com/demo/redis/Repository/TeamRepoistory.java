@@ -28,7 +28,9 @@ public class TeamRepoistory implements TeamRepo{
     @Override
     public void save(Team team){
         //if(team == null)return;
+        if(getById(team.getName())!=null)return;
         hashOperations.put("TEAM", team.getName(), team);
+        redisTemplate.expire("TEAM",5,TimeUnit.SECONDS);
 
     }
     //get team by id
@@ -45,16 +47,21 @@ public class TeamRepoistory implements TeamRepo{
         //map1.put("TEAM", list);
         for (Team t:
                 list) {
-            map1.put(t.getName(), t);
-            //redisTemplate.expire(t.getName(),3, TimeUnit.DAYS);
+            save(t);
         }
-        hashOperations.putAll("TEAM", map1);
+
     }
 
     //get list of all teams
     @Override
     public Map<String,Object> findAll(){
         return  hashOperations.entries("TEAM");
+    }
+
+    @Override
+    public Long find()
+    {
+        return hashOperations.size("TEAM");
     }
 
 

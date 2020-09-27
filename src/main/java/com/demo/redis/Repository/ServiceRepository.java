@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 public class ServiceRepository implements ServiceRepo{
@@ -25,7 +26,10 @@ public class ServiceRepository implements ServiceRepo{
     }
     @Override
     public void save(Services services){
+        if(getById(services.getId()) != null)return ;
         hashOperations.put("SERVICE",services.getId().toString(),services);
+        //System.out.println("cache miss");
+        redisTemplate.expire("SERVICE",5, TimeUnit.SECONDS);
     }
     @Override
     public Services getById(Long id){
@@ -36,12 +40,20 @@ public class ServiceRepository implements ServiceRepo{
         Map<String, Object> map1 = new HashMap<>();
         for (Services u:
                 list) {
-            map1.put(u.getId().toString(), u);
+            save(u);
         }
-        hashOperations.putAll("SERVICE",map1);
     }
+
     @Override
-    public Map<String,Object> usersMap(){
+    public Map<String,Object> servicesMap(){
         return hashOperations.entries("SERVICE");
     }
+
+    @Override
+    public Long find()
+    {
+
+        return hashOperations.size("SERVICE");
+    }
+
 }

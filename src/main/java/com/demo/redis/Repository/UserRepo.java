@@ -13,4 +13,5 @@ public interface UserRepo {
     public Users getByEmail(String email);
     public void saveAll(List<Users> list);
     public Map<String,Object> usersMap();
+    public Long find();
 }
