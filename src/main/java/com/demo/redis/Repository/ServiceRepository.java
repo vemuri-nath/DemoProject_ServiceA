@@ -1,6 +1,7 @@
 package com.demo.redis.Repository;
 
-import com.demo.redis.Model.Team;
+import com.demo.redis.Model.Services;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,57 +13,47 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Repository
-public class TeamRepoistory implements TeamRepo{
+public class ServiceRepository implements ServiceRepo{
     private HashOperations hashOperations;
     //private ListOperations listOperations;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    public TeamRepoistory(RedisTemplate redisTemplate){
+    public ServiceRepository(RedisTemplate redisTemplate){
         this.redisTemplate = redisTemplate;
         this.hashOperations = this.redisTemplate.opsForHash();
         //this.listOperations = redisTemplate.opsForList();
     }
-
-    //save team
     @Override
-    public void save(Team team){
-        //if(team == null)return;
-        if(getById(team.getName())!=null)return;
-        hashOperations.put("TEAM", team.getName(), team);
-        redisTemplate.expire("TEAM",5,TimeUnit.SECONDS);
-
+    public void save(Services services){
+        if(getById(services.getId()) != null)return ;
+        hashOperations.put("SERVICE",services.getId().toString(),services);
+        //System.out.println("cache miss");
+        redisTemplate.expire("SERVICE",5, TimeUnit.SECONDS);
     }
-    //get team by id
     @Override
-    public Team getById(String id){
-        //returns null if not found
-        return (Team) hashOperations.get("TEAM",id);
+    public Services getById(Long id){
+        return (Services) hashOperations.get("SERVICE",id.toString());
     }
-
-    //save all team
     @Override
-    public void saveAll(List<Team> list){
+    public void saveAll(List<Services> list){
         Map<String, Object> map1 = new HashMap<>();
-        //map1.put("TEAM", list);
-        for (Team t:
+        for (Services u:
                 list) {
-            save(t);
+            save(u);
         }
-
     }
 
-    //get list of all teams
     @Override
-    public Map<String,Object> findAll(){
-        return  hashOperations.entries("TEAM");
+    public Map<String,Object> servicesMap(){
+        return hashOperations.entries("SERVICE");
     }
 
     @Override
     public Long find()
     {
-        return hashOperations.size("TEAM");
-    }
 
+        return hashOperations.size("SERVICE");
+    }
 
 }

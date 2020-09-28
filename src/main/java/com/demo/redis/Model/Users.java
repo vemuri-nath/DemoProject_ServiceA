@@ -34,5 +34,7 @@ public class Users implements Serializable {
     private String gender;
     @JsonProperty("password")
     private String password;
+    @JsonProperty("ut_fk")
+    private long ut_fk;
 
 }

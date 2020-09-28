@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
+
 import java.util.List;
 import java.util.Map;
 
@@ -29,34 +29,24 @@ public class RedisController {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    @PostMapping ("/{id}")
-    public Team saveTeam(@PathVariable String id) throws JsonProcessingException {
+
+    @GetMapping("/{id}")
+    public Team getTeam(@PathVariable String id) throws JsonProcessingException {
+        if(repo.getById(id)!=null)return repo.getById(id);
         String ts = restTemplate.getForObject("http://localhost:8083/api/team/"+id,String.class);
         if(ts == null)return null;
         Team team = objectMapper.readValue(ts,Team.class);
-        if(team == null)return null;
         repo.save(team);
-        return team;
-    }
-    @GetMapping("/{id}")
-    public Team getTeam(@PathVariable String id){
-        return repo.getById(id);
+        return repo.getById(team.getName());
     }
 
-    @PostMapping("/all")
-   public List list() throws JsonProcessingException {
+    @GetMapping("/all")
+    public Map<String, Object> getTeam() throws JsonProcessingException {
+        if(repo.find()!=0)return repo.findAll();
         String s = restTemplate.getForObject("http://localhost:8083/api/team/",String.class);
         List<Team> teams = objectMapper.readValue(s,new TypeReference<List<Team>>() {});
         repo.saveAll(teams);
-        return teams;
-   }
-
-
-    @GetMapping("/all")
-    public Map<String, Object> getTeam()  {
-
         return repo.findAll();
-
     }
 
 }
